@@ -2,6 +2,20 @@
 
 Кроссплатформенная электронная визитница на **Tauri 2 + React + TypeScript + Vite**. Один frontend запускается как обычное web-приложение и упаковывается в native-приложения для Windows, macOS, Linux, Android и iOS.
 
+## Готовые сборки
+
+Установщики для Windows и Android — на странице [Releases](https://github.com/myahlovvlad/card-vault-tauri/releases). Перенос данных между устройствами — через **Экспорт → Резервная копия JSON** / **Экспорт → Импорт JSON** (см. «Хранение и перенос данных» ниже); полноценная облачная синхронизация не реализована.
+
+### Подпись Android release-сборки
+
+`tauri android build` (без `--debug`) подписывает APK ключом из `src-tauri/gen/android/keystore.properties` (формат: `storeFile`/`storePassword`/`keyAlias`/`keyPassword`). Этот файл и сам keystore **не входят в репозиторий** (внутри `src-tauri/gen/`, которая целиком в `.gitignore`) — они должны существовать локально на машине, выполняющей release-сборку. Если файла нет, `signingConfigs["release"]` в `app/build.gradle.kts` просто не создаётся и релизная сборка получится неподписанной. Чтобы сгенерировать новый keystore:
+
+```bash
+keytool -genkeypair -v -keystore <путь>/cardvault-release.jks -alias cardvault -keyalg RSA -keysize 2048 -validity 10000
+```
+
+и создать `src-tauri/gen/android/keystore.properties` с путём к нему и паролями. Храните keystore и пароль отдельно от репозитория — потеря ключа означает невозможность выпустить обновление, подписанное тем же сертификатом.
+
 ## Что уже реализовано
 
 - загрузка нескольких фото одной визитки, с метками «лицевая / оборотная / другое»;
