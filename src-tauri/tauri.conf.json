@@ -29,6 +29,13 @@
     "targets": "all",
     "category": "Productivity",
     "shortDescription": "Электронная визитница с OCR",
-    "longDescription": "Локальный каталог визитных карточек с OCR, папками, поиском, избранным и экспортом контактов."
+    "longDescription": "Локальный каталог визитных карточек с OCR, папками, поиском, избранным и экспортом контактов.",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
   }
 }
