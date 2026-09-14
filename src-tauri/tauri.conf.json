@@ -1,0 +1,34 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "CardVault",
+  "version": "0.1.0",
+  "identifier": "com.vladmyahlov.cardvault",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "CardVault",
+        "width": 1280,
+        "height": 820,
+        "minWidth": 860,
+        "minHeight": 620,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "Productivity",
+    "shortDescription": "Электронная визитница с OCR",
+    "longDescription": "Локальный каталог визитных карточек с OCR, папками, поиском, избранным и экспортом контактов."
+  }
+}
