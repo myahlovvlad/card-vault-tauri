@@ -1,0 +1,33 @@
+name: windows-build
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build Windows bundles
+        run: npm run tauri:build
+
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: cardvault-windows
+          path: |
+            src-tauri/target/release/bundle/msi/**
+            src-tauri/target/release/bundle/nsis/**
+          if-no-files-found: error
