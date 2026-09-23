@@ -14,7 +14,7 @@ export function CardPresent({ card, onClose }: Props) {
 
   useEffect(() => {
     if (!card) return;
-    void QRCode.toDataURL(createVCard(activeCard), { margin: 1, width: 720 }).then(setQr);
+    void QRCode.toDataURL(createVCard(card), { margin: 1, width: 720 }).then(setQr);
   }, [card]);
 
   const activeCard = card;
