@@ -11,10 +11,6 @@ export interface ContactConnector {
   sync(data: AppData): Promise<ConnectorResult>;
 }
 
-/**
- * Extension point for CRM integrations (Bitrix24, amoCRM, HubSpot, custom REST).
- * The MVP deliberately does not ship credentials or vendor-specific OAuth flows.
- */
 export class PlaceholderCrmConnector implements ContactConnector {
   id = 'crm-placeholder';
   name = 'CRM connector';
@@ -34,6 +30,7 @@ export function createVCard(card: BusinessCard): string {
   if (card.phone) lines.push(`TEL:${escapeVCardValue(card.phone)}`);
   if (card.email) lines.push(`EMAIL:${escapeVCardValue(card.email)}`);
   if (card.website) lines.push(`URL:${escapeVCardValue(card.website)}`);
+  if (card.address) lines.push(`ADR:;;${escapeVCardValue(card.address)};;;;`);
   if (card.comment) lines.push(`NOTE:${escapeVCardValue(card.comment)}`);
   lines.push('END:VCARD');
   return lines.join('\r\n');
@@ -43,7 +40,6 @@ export function isVCard(text: string): boolean {
   return /BEGIN:VCARD/i.test(text);
 }
 
-/** Parses a vCard 2.1/3.0 payload (e.g. decoded from a scanned QR code) into a card draft for user confirmation. */
 export function parseVCard(text: string, folderId: string): CardDraft {
   const unfolded = text.replace(/\r\n/g, '\n').replace(/\n[ \t]/g, '');
   const lines = unfolded.split('\n').map((line) => line.trim()).filter(Boolean);
@@ -55,13 +51,19 @@ export function parseVCard(text: string, folderId: string): CardDraft {
     phone: '',
     email: '',
     website: '',
+    address: '',
+    tags: [],
     comment: '',
     starred: false,
     photos: [],
     ocrText: text,
   };
 
-  const unescape = (value: string) => value.replace(/\\n/gi, '\n').replace(/\\,/g, ',').replace(/\\;/g, ';').replace(/\\\\/g, '\\');
+  const unescape = (value: string) => value
+    .replace(/\\n/gi, '\n')
+    .replace(/\\,/g, ',')
+    .replace(/\\;/g, ';')
+    .replace(/\\\\/g, '\\');
 
   for (const line of lines) {
     const separatorIndex = line.indexOf(':');
@@ -70,18 +72,12 @@ export function parseVCard(text: string, folderId: string): CardDraft {
     const value = unescape(line.slice(separatorIndex + 1));
     const key = rawKey.split(';')[0].toUpperCase();
     switch (key) {
-      case 'FN':
-        draft.fullName = value;
-        break;
+      case 'FN': draft.fullName = value; break;
       case 'N':
         if (!draft.fullName) draft.fullName = value.split(';').filter(Boolean).reverse().join(' ');
         break;
-      case 'ORG':
-        draft.company = value.split(';')[0];
-        break;
-      case 'TITLE':
-        draft.jobTitle = value;
-        break;
+      case 'ORG': draft.company = value.split(';')[0]; break;
+      case 'TITLE': draft.jobTitle = value; break;
       case 'TEL':
         if (!draft.phone) draft.phone = value;
         break;
@@ -91,14 +87,13 @@ export function parseVCard(text: string, folderId: string): CardDraft {
       case 'URL':
         if (!draft.website) draft.website = value;
         break;
-      case 'NOTE':
-        draft.comment = value;
+      case 'ADR':
+        draft.address = value.split(';').filter(Boolean).join(', ');
         break;
-      default:
-        break;
+      case 'NOTE': draft.comment = value; break;
+      default: break;
     }
   }
-
   return draft;
 }
 

@@ -1,4 +1,5 @@
 export type CardPhotoSide = 'front' | 'back' | 'other';
+export type OcrMode = 'auto' | 'local' | 'cloud';
 
 export interface CardPhoto {
   id: string;
@@ -16,6 +17,8 @@ export interface BusinessCard {
   phone: string;
   email: string;
   website: string;
+  address: string;
+  tags: string[];
   comment: string;
   starred: boolean;
   photos: CardPhoto[];
@@ -30,23 +33,34 @@ export interface Folder {
   createdAt: string;
 }
 
+export interface AppSettings {
+  ocrLanguage: string;
+  ocrMode: OcrMode;
+  cloudOcrEndpoint: string;
+  allowCloudOcr: boolean;
+}
+
 export interface AppData {
-  schemaVersion: 2;
+  schemaVersion: 3;
   folders: Folder[];
   cards: BusinessCard[];
   ownCards: BusinessCard[];
-  settings: {
-    ocrLanguage: string;
-  };
+  settings: AppSettings;
 }
 
 export interface AppDataV1 {
   schemaVersion: 1;
   folders: Folder[];
-  cards: BusinessCard[];
-  settings: {
-    ocrLanguage: string;
-  };
+  cards: Omit<BusinessCard, 'address' | 'tags'>[];
+  settings: { ocrLanguage: string };
+}
+
+export interface AppDataV2 {
+  schemaVersion: 2;
+  folders: Folder[];
+  cards: Omit<BusinessCard, 'address' | 'tags'>[];
+  ownCards: Omit<BusinessCard, 'address' | 'tags'>[];
+  settings: { ocrLanguage: string };
 }
 
 export interface CardDraft {
@@ -57,8 +71,27 @@ export interface CardDraft {
   phone: string;
   email: string;
   website: string;
+  address: string;
+  tags: string[];
   comment: string;
   starred: boolean;
   photos: CardPhoto[];
   ocrText: string;
+}
+
+export interface OcrField {
+  value: string;
+  confidence?: number;
+}
+
+export interface OcrResult {
+  fullName?: OcrField;
+  company?: OcrField;
+  jobTitle?: OcrField;
+  phone?: OcrField;
+  email?: OcrField;
+  website?: OcrField;
+  address?: OcrField;
+  rawText: string;
+  provider: 'local' | 'cloud';
 }
